@@ -1,0 +1,19 @@
+{
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    // "runArgs": [
+    //     "--device=/dev/video0"
+    // ],
+    "postCreateCommand": "poetry install --no-root",
+    "customizations": {
+        "settings": {
+            "python.terminal.activateEnvironment": true,
+            "python.defaultInterpreterPath": "../.venv/bin/python",
+        },
+        "vscode": {
+            "extensions": [
+                "ms-python.python"
+            ]}
+    }
+}

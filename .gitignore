@@ -7,8 +7,6 @@ __pycache__
 build
 *.egg
 .eggs
-.vscode/
-.vscode/settings.json
 .ipynb_checkpoints
 .vscode/launch.json
 tmp
@@ -16,3 +14,4 @@ venv
 .env
 temp
 models
+.venv
