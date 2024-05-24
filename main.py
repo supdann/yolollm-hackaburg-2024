@@ -1,3 +1,4 @@
+import dotenv
 import cv2
 import math
 import sys
@@ -10,6 +11,9 @@ from fastapi import FastAPI
 import uvicorn
 from tts import play, last_played
 from gpt import describe
+
+# Load environment variables
+dotenv.load_dotenv()
 
 print(cv2.__version__)
 

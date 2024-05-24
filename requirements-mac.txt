@@ -1,0 +1,2 @@
+ultralytics==8.2.20
+openai==1.30.2
