@@ -152,59 +152,65 @@ def start_server():
 
 
 # Function to run the camera processing loop
-async def run_camera():
+async def run_camera(process_interval_ms=100):
+
+    last_process_time = 0  # Track the last process time
 
     while True:
-        for i in range(2):
-            success, img = cap.read()
 
-        with SuppressOutput():
-            # Run batched inference on a list of images
-            results = model(img, stream=True)
+        current_time = time.time() * 1000  # Current time in milliseconds
+        success, img = cap.read()
 
-        # Process results list
-        for r in results:
-            boxes = r.boxes
+        if current_time - last_process_time >= process_interval_ms:
+            last_process_time = current_time
 
-            for box in boxes:
-                # Bounding box
-                x1, y1, x2, y2 = box.xyxy[0]
-                x1, y1, x2, y2 = (
-                    int(x1),
-                    int(y1),
-                    int(x2),
-                    int(y2),
-                )  # convert to int values
+            with SuppressOutput():
+                # Run batched inference on a list of images
+                results = model(img, stream=True)
 
-                # Put box in cam
-                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
+            # Process results list
+            for r in results:
+                boxes = r.boxes
 
-                # Confidence
-                confidence = math.ceil((box.conf[0] * 100)) / 100
+                for box in boxes:
+                    # Bounding box
+                    x1, y1, x2, y2 = box.xyxy[0]
+                    x1, y1, x2, y2 = (
+                        int(x1),
+                        int(y1),
+                        int(x2),
+                        int(y2),
+                    )  # convert to int values
 
-                # Class name
-                cls = int(box.cls[0])
-                class_name = classNames[cls]
+                    # Put box in cam
+                    cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
 
-                # Check if the class name is in trigger objects
-                if class_name in trigger_objects:
-                    current_time = time.time()
-                    if (
-                        class_name not in last_played
-                        or current_time - last_played[class_name] > 10
-                    ):
-                        play(class_name)
+                    # Confidence
+                    confidence = math.ceil((box.conf[0] * 100)) / 100
 
-                # Object details
-                org = [x1, y1]
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                fontScale = 1
-                color = (255, 0, 0)
-                thickness = 2
+                    # Class name
+                    cls = int(box.cls[0])
+                    class_name = classNames[cls]
 
-                cv2.putText(
-                    img, classNames[cls], org, font, fontScale, color, thickness
-                )
+                    # Check if the class name is in trigger objects
+                    if class_name in trigger_objects:
+                        current_time = time.time()
+                        if (
+                            class_name not in last_played
+                            or current_time - last_played[class_name] > 10
+                        ):
+                            play(class_name)
+
+                    # Object details
+                    org = [x1, y1]
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    fontScale = 1
+                    color = (255, 0, 0)
+                    thickness = 2
+
+                    cv2.putText(
+                        img, classNames[cls], org, font, fontScale, color, thickness
+                    )
 
         cv2.imshow("Webcam", img)
 
