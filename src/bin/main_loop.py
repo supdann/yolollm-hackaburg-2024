@@ -1,3 +1,5 @@
+import contextvars
+import functools
 import cv2
 import asyncio
 
@@ -259,8 +261,15 @@ async def run_camera(process_interval_ms=PROCESS_INTERVAL_MS):
     cv2.destroyAllWindows()
 
 
+async def to_thread(func, /, *args, **kwargs):
+    loop = asyncio.get_running_loop()
+    ctx = contextvars.copy_context()
+    func_call = functools.partial(ctx.run, func, *args, **kwargs)
+    return await loop.run_in_executor(None, func_call)
+
+
 async def main():
-    server_task = asyncio.create_task(asyncio.to_thread(start_server))
+    server_task = asyncio.create_task(to_thread(start_server))
     camera_task = asyncio.create_task(run_camera())
 
     await asyncio.gather(server_task, camera_task)
