@@ -37,6 +37,7 @@ setup(
     entry_points={
         "console_scripts": [
             "test-with-video=src.bin.test_video:run",
+            "main-loop=src.bin.main_loop:run",
         ],
     },
 )
