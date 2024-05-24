@@ -3,3 +3,4 @@ openai==1.30.2
 opencv-python-headless==4.9.0.80
 python-dotenv
 fastapi==0.111.0
+pygame

@@ -48,3 +48,5 @@ def describe(image_path: str):
     )
 
     print(response.json())
+
+    return response.json()["choices"][0]["message"]["content"][0]["text"]

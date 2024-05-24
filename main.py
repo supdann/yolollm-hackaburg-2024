@@ -9,7 +9,7 @@ import asyncio
 from ultralytics import YOLO
 from fastapi import FastAPI
 import uvicorn
-from tts import play, last_played
+from tts import AudioPlayer, last_played
 from gpt import describe
 
 # Load environment variables
@@ -125,6 +125,8 @@ class SuppressOutput:
         sys.stderr = self._original_stderr
 
 
+PLAY_DELAY_SECONDS = 10
+
 # Initialize FastAPI app
 app = FastAPI()
 
@@ -153,6 +155,8 @@ def start_server():
 
 # Function to run the camera processing loop
 async def run_camera(process_interval_ms=100):
+
+    audioplayer = AudioPlayer()
 
     last_process_time = 0  # Track the last process time
 
@@ -197,9 +201,11 @@ async def run_camera(process_interval_ms=100):
                         current_time = time.time()
                         if (
                             class_name not in last_played
-                            or current_time - last_played[class_name] > 10
+                            or current_time - last_played[class_name]
+                            > PLAY_DELAY_SECONDS
                         ):
-                            play(class_name)
+                            audioplayer.play(class_name)
+                            last_played[class_name] = current_time
 
                     # Object details
                     org = [x1, y1]
