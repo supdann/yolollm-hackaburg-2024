@@ -9,6 +9,7 @@ import asyncio
 from ultralytics import YOLO
 from fastapi import FastAPI
 import uvicorn
+from assistant import YoloLLMAssistant
 from tts import AudioPlayer, last_played
 from gpt import describe
 
@@ -24,7 +25,7 @@ logging.getLogger("ultralytics").setLevel(logging.ERROR)
 model = YOLO("models/yolov8n.pt")  # load a pretrained model (recommended for training)
 
 # List of objects that can trigger the playing
-trigger_objects = ["bottle"]
+trigger_objects = ["bottle", "bicycle", "car"]
 
 # classes
 classNames = [
@@ -125,7 +126,7 @@ class SuppressOutput:
         sys.stderr = self._original_stderr
 
 
-PLAY_DELAY_SECONDS = 10
+PLAY_DELAY_SECONDS = 4
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -154,9 +155,11 @@ def start_server():
 
 
 # Function to run the camera processing loop
-async def run_camera(process_interval_ms=100):
+async def run_camera(process_interval_ms=500):
 
     audioplayer = AudioPlayer()
+
+    assistant = YoloLLMAssistant(audio_player=audioplayer)
 
     last_process_time = 0  # Track the last process time
 
@@ -171,6 +174,9 @@ async def run_camera(process_interval_ms=100):
             with SuppressOutput():
                 # Run batched inference on a list of images
                 results = model(img, stream=True)
+
+            # Placeholder for predicted classes
+            predicted_classes = []
 
             # Process results list
             for r in results:
@@ -198,12 +204,14 @@ async def run_camera(process_interval_ms=100):
 
                     # Check if the class name is in trigger objects
                     if class_name in trigger_objects:
+                        predicted_classes.append(class_name)
                         current_time = time.time()
                         if (
                             class_name not in last_played
                             or current_time - last_played[class_name]
                             > PLAY_DELAY_SECONDS
                         ):
+                            print(f"attempting to play {class_name} ")
                             audioplayer.play(class_name)
                             last_played[class_name] = current_time
 
@@ -217,6 +225,15 @@ async def run_camera(process_interval_ms=100):
                     cv2.putText(
                         img, classNames[cls], org, font, fontScale, color, thickness
                     )
+
+            # If the classes are trigger objects, add them to the predictions
+            assistant.add_predictions(predicted_classes)
+
+            # Print the predictions
+            assistant.print_predictions()
+
+            # Analyze the predictions
+            assistant.analyze_predictions()
 
         cv2.imshow("Webcam", img)
 
