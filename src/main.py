@@ -24,7 +24,7 @@ logging.getLogger("ultralytics").setLevel(logging.ERROR)
 # Load a model
 model = YOLO("models/yolov8n.pt")  # load a pretrained model (recommended for training)
 
-# List of objects that can trigger the playing
+# List of objects from the YOLO model that can trigger danger warnings
 trigger_objects = ["bottle", "bicycle", "car"]
 
 # classes
@@ -126,6 +126,10 @@ class SuppressOutput:
         sys.stderr = self._original_stderr
 
 
+# Camera processing interval in milliseconds
+PROCESS_INTERVAL_MS = 500
+
+# Delay between sound playback
 PLAY_DELAY_SECONDS = 4
 
 # Initialize FastAPI app
@@ -155,7 +159,7 @@ def start_server():
 
 
 # Function to run the camera processing loop
-async def run_camera(process_interval_ms=500):
+async def run_camera(process_interval_ms=PROCESS_INTERVAL_MS):
 
     audioplayer = AudioPlayer()
 
