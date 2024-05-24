@@ -2,7 +2,7 @@ import time
 from typing import List
 from pydantic import BaseModel
 
-from tts import AudioPlayer
+from src.tts import AudioPlayer
 
 
 class YoloLLMAssistant:
