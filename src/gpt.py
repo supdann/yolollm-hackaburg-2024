@@ -47,10 +47,13 @@ def describe(image_path: str) -> Optional[GPTImageAnalysis]:
         format_instructions = parser.get_format_instructions()
 
         describe_prompt = (
-            "Describe in simple words and a short sentence what is in the image. "
+            "Describe in simple words and a short sentence what is in the image, less than 8 words. "
             "Format the sentence in such a way as if you were speaking directly to a blind person. "
-            f"\n\n{format_instructions}"
+            "Also, warn about any potential danger or obstacles in the image only if necessary."
         )
+
+        # Add Format Instructions to the prompt
+        describe_prompt += f"\n\n{format_instructions}"
 
         payload = {
             "model": "gpt-4o",

@@ -174,22 +174,7 @@ async def start():
                     # Process results list
                     for r in results:
                         boxes = r.boxes
-
                         for box in boxes:
-                            # Bounding box
-                            x1, y1, x2, y2 = box.xyxy[0]
-                            x1, y1, x2, y2 = (
-                                int(x1),
-                                int(y1),
-                                int(x2),
-                                int(y2),
-                            )  # convert to int values
-
-                            # Put box in frame
-                            cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 3)
-
-                            # Confidence
-                            confidence = math.ceil((box.conf[0] * 100)) / 100
 
                             # Class name
                             cls = int(box.cls[0])
@@ -197,33 +182,50 @@ async def start():
 
                             # Check if the class name is in trigger objects
                             if class_name in trigger_objects:
+                                # Bounding box
+                                x1, y1, x2, y2 = box.xyxy[0]
+                                x1, y1, x2, y2 = (
+                                    int(x1),
+                                    int(y1),
+                                    int(x2),
+                                    int(y2),
+                                )  # convert to int values
+
+                                # Put box in frame
+                                cv2.rectangle(
+                                    frame, (x1, y1), (x2, y2), (255, 0, 255), 3
+                                )
+
+                                # Confidence
+                                # confidence = math.ceil((box.conf[0] * 100)) / 100
+
                                 predicted_classes.append(class_name)
-                                current_time = time.time()
-                                if (
-                                    class_name not in last_played
-                                    or current_time - last_played[class_name]
-                                    > PLAY_DELAY_SECONDS
-                                ):
-                                    print(f"attempting to play {class_name} ")
-                                    audioplayer.play(class_name)
-                                    last_played[class_name] = current_time
+                                # current_time = time.time()
+                                # if (
+                                #     class_name not in last_played
+                                #     or current_time - last_played[class_name]
+                                #     > PLAY_DELAY_SECONDS
+                                # ):
+                                #     print(f"attempting to play {class_name} ")
+                                #     audioplayer.play(class_name)
+                                #     last_played[class_name] = current_time
 
-                            # Object details
-                            org = [x1, y1]
-                            font = cv2.FONT_HERSHEY_SIMPLEX
-                            fontScale = 1
-                            color = (255, 0, 0)
-                            thickness = 2
+                                # Object details
+                                org = [x1, y1]
+                                font = cv2.FONT_HERSHEY_SIMPLEX
+                                fontScale = 1
+                                color = (255, 0, 0)
+                                thickness = 2
 
-                            cv2.putText(
-                                frame,
-                                classNames[cls],
-                                org,
-                                font,
-                                fontScale,
-                                color,
-                                thickness,
-                            )
+                                cv2.putText(
+                                    frame,
+                                    classNames[cls],
+                                    org,
+                                    font,
+                                    fontScale,
+                                    color,
+                                    thickness,
+                                )
 
                     # If the classes are trigger objects, add them to the predictions
                     assistant.add_predictions(predicted_classes)
@@ -231,8 +233,12 @@ async def start():
                     # Print the predictions
                     assistant.print_predictions()
 
+                    # Save the current frame as an image
+                    image_path = Path("./src/data") / f"captured_frame.jpg"
+                    cv2.imwrite(str(image_path), frame)
+
                     # Analyze the predictions
-                    assistant.analyze_predictions()
+                    assistant.analyze_predictions(with_img=image_path)
 
                 # Display the resulting frame
                 cv2.imshow("Video Playback", frame)

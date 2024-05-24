@@ -38,7 +38,7 @@ class AudioPlayer:
     def get_file_for_class(self, class_name: str):
 
         # Audio Save Path
-        audio_save_path = Path("data/audio")
+        audio_save_path = Path("./src/data/audio")
 
         # Create data/audio directory if it doesn't exist
         if not os.path.exists(audio_save_path):
