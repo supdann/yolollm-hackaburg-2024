@@ -8,7 +8,6 @@ from openai import OpenAI
 import pygame
 
 load_dotenv()
-last_played = {}
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 

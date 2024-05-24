@@ -10,7 +10,7 @@ from ultralytics import YOLO
 from fastapi import FastAPI
 import uvicorn
 from assistant import YoloLLMAssistant
-from tts import AudioPlayer, last_played
+from tts import AudioPlayer
 from gpt import describe
 
 # Load environment variables
@@ -135,6 +135,7 @@ PLAY_DELAY_SECONDS = 4
 # Initialize FastAPI app
 app = FastAPI()
 
+last_played = {}
 
 # Initialize camera
 cap = cv2.VideoCapture(0)
