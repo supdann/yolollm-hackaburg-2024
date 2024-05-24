@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.8"
 ultralytics = "^8.2.20"
 opencv-python = "^4.9.0.80"
+fastapi = "^0.111.0"
 
 
 [build-system]
