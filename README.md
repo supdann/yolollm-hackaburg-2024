@@ -1,3 +1,36 @@
+# Dev Guide
+
+## Usage for VSCode
+
+For everyone who uses VSCode, this should work almost out of the box. Just open the project folder in VSCode, make sure you have Docker installed,
+and you should be able to "Open in Container" from the Remote Development extension. (You may need to install the extension first.)
+
+## Usage for Docker
+
+If you don't use VSCode, you can still use Docker to run the project. Just run the following command in the project directory:
+
+```bash
+docker build -t yolollm .devcontainer/Dockerfile
+docker run -it --rm -v $(pwd):/app yolollm
+```
+
+This will build the Docker image and run a container with the project mounted at `/app`. You can then run the project as usual. (Connect to the container, activate the virtual environment, and run the script.)
+
+**Note:** Remember to install the required dependencies in the virtual environment by running `poetry install --no-root` before running the script.
+
+
+## Adding New Dependencies
+
+If you need to add a new dependency, you can do so by running the following command:
+
+```bash
+poetry add <package>
+```
+
+This will add the package to the `pyproject.toml` file and install it in the virtual environment.
+
+
+
 # YOLOLLM
 
 This project captures video input from the camera and processes frames using YOLO (You Only Look Once) with OpenCV.
