@@ -1,5 +1,6 @@
 import contextvars
 import functools
+from pathlib import Path
 import cv2
 import asyncio
 
@@ -148,6 +149,10 @@ cap = cv2.VideoCapture(0)
 cap.set(3, 640)
 cap.set(4, 480)
 
+audioplayer = AudioPlayer()
+
+assistant = YoloLLMAssistant(audio_player=audioplayer)
+
 
 @app.get("/describe")
 def get_description():
@@ -155,7 +160,7 @@ def get_description():
     if success:
         image_path = "data/captured_frame.jpg"
         cv2.imwrite(image_path, img)
-        return {"description": describe(image_path)}
+        return {"description": assistant.describe(image_path)}
     else:
         return {"error": "Failed to capture image"}
 
@@ -167,10 +172,6 @@ def start_server():
 
 # Function to run the camera processing loop
 async def run_camera(process_interval_ms=PROCESS_INTERVAL_MS):
-
-    audioplayer = AudioPlayer()
-
-    assistant = YoloLLMAssistant(audio_player=audioplayer)
 
     last_process_time = 0  # Track the last process time
 
@@ -192,22 +193,7 @@ async def run_camera(process_interval_ms=PROCESS_INTERVAL_MS):
             # Process results list
             for r in results:
                 boxes = r.boxes
-
                 for box in boxes:
-                    # Bounding box
-                    x1, y1, x2, y2 = box.xyxy[0]
-                    x1, y1, x2, y2 = (
-                        int(x1),
-                        int(y1),
-                        int(x2),
-                        int(y2),
-                    )  # convert to int values
-
-                    # Put box in cam
-                    cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
-
-                    # Confidence
-                    confidence = math.ceil((box.conf[0] * 100)) / 100
 
                     # Class name
                     cls = int(box.cls[0])
@@ -215,27 +201,48 @@ async def run_camera(process_interval_ms=PROCESS_INTERVAL_MS):
 
                     # Check if the class name is in trigger objects
                     if class_name in trigger_objects:
+                        # Bounding box
+                        x1, y1, x2, y2 = box.xyxy[0]
+                        x1, y1, x2, y2 = (
+                            int(x1),
+                            int(y1),
+                            int(x2),
+                            int(y2),
+                        )  # convert to int values
+
+                        # Put box in frame
+                        cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
+
+                        # Confidence
+                        # confidence = math.ceil((box.conf[0] * 100)) / 100
+
                         predicted_classes.append(class_name)
-                        current_time = time.time()
-                        if (
-                            class_name not in last_played
-                            or current_time - last_played[class_name]
-                            > PLAY_DELAY_SECONDS
-                        ):
-                            print(f"attempting to play {class_name} ")
-                            audioplayer.play(class_name)
-                            last_played[class_name] = current_time
+                        # current_time = time.time()
+                        # if (
+                        #     class_name not in last_played
+                        #     or current_time - last_played[class_name]
+                        #     > PLAY_DELAY_SECONDS
+                        # ):
+                        #     print(f"attempting to play {class_name} ")
+                        #     audioplayer.play(class_name)
+                        #     last_played[class_name] = current_time
 
-                    # Object details
-                    org = [x1, y1]
-                    font = cv2.FONT_HERSHEY_SIMPLEX
-                    fontScale = 1
-                    color = (255, 0, 0)
-                    thickness = 2
+                        # Object details
+                        org = [x1, y1]
+                        font = cv2.FONT_HERSHEY_SIMPLEX
+                        fontScale = 1
+                        color = (255, 0, 0)
+                        thickness = 2
 
-                    cv2.putText(
-                        img, classNames[cls], org, font, fontScale, color, thickness
-                    )
+                        cv2.putText(
+                            img,
+                            classNames[cls],
+                            org,
+                            font,
+                            fontScale,
+                            color,
+                            thickness,
+                        )
 
             # If the classes are trigger objects, add them to the predictions
             assistant.add_predictions(predicted_classes)
@@ -243,9 +250,12 @@ async def run_camera(process_interval_ms=PROCESS_INTERVAL_MS):
             # Print the predictions
             assistant.print_predictions()
 
-            # Analyze the predictions
-            assistant.analyze_predictions()
+            # Save the current frame as an image
+            image_path = Path("./src/data") / f"captured_frame.jpg"
+            cv2.imwrite(str(image_path), img)
 
+            # Analyze the predictions
+            assistant.analyze_predictions(with_img=image_path)
         cv2.imshow("Webcam", img)
 
         # Break the loop on 'q' key press
