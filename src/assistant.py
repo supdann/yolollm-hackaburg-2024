@@ -21,10 +21,10 @@ from src.tts import AudioPlayer
 api_key = os.getenv("OPENAI_API_KEY")
 
 
-class GPTImageAnalysis(BaseModel):
-    message: str = Field(
-        description="The advice given by the assistant for the blind person"
-    )
+# class GPTImageAnalysis(BaseModel):
+#     message: str = Field(
+#         description="The advice given by the assistant for the blind person"
+#     )
 
 
 class YoloLLMAssistant:
@@ -91,7 +91,7 @@ class YoloLLMAssistant:
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode("utf-8")
 
-    def describe(self, img_b64: str) -> Optional[GPTImageAnalysis]:
+    def describe(self, img_b64: str) -> Optional[str]:
         try:
             # parser = PydanticOutputParser(pydantic_object=GPTImageAnalysis)
 

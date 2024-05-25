@@ -154,7 +154,15 @@ def get_description():
         image_path = Path("./src/data") / f"describe_frame.jpg"
         cv2.imwrite(str(image_path), img)
 
-        return {"description": assistant.describe(image_path)}
+        img_base64 = assistant.encode_image(image_path)
+
+        if assistant.assistant_queue.empty() and audioplayer.audio_queue.empty():
+            description = assistant.describe(img_base64)
+            audioplayer._play_audio(description)
+        else:
+            print("Worker is busy, skipping current frame")
+
+        return {"description": description}
     else:
         return {"error": "Failed to capture image"}
 
