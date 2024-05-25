@@ -14,7 +14,7 @@ from src.tts import AudioPlayer
 
 
 # Langchain Imports
-from langchain.output_parsers import PydanticOutputParser
+# from langchain.output_parsers import PydanticOutputParser
 
 
 # API key
@@ -81,7 +81,7 @@ class YoloLLMAssistant:
         print(f"Generating instruction for {classes}")
         # Simulate the task taking 10 seconds
         description = self.describe(img_base64)
-        self.audio_player._play_audio(description.message)
+        self.audio_player._play_audio(description)
 
     def print_predictions(self):
         print(self.predictions)
@@ -93,31 +93,31 @@ class YoloLLMAssistant:
 
     def describe(self, img_b64: str) -> Optional[GPTImageAnalysis]:
         try:
-            parser = PydanticOutputParser(pydantic_object=GPTImageAnalysis)
+            # parser = PydanticOutputParser(pydantic_object=GPTImageAnalysis)
 
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {api_key}",
             }
 
-            format_instructions = parser.get_format_instructions()
+            # format_instructions = parser.get_format_instructions()
 
-            MAX_WORDS = 15
+            MAX_WORDS = 10
 
             describe_prompt = (
                 # f"Describe in simple words and in less than f{MAX_WORDS} what is in the image. "
                 f"Describe the image or warn about any potential danger or obstacles if necessary. "
                 "For example, watch out for the bycicle coming on the left etc. "
                 f"EVERYTHING IN LESS THAN {MAX_WORDS} WORDS. "
-                "Format the sentence in such a way as if you were speaking directly to a blind person. "
+                "Format the sentence in such a way as if you were speaking directly to the blind person. "
             )
 
             # Add Format Instructions to the prompt
-            describe_prompt += f"\n\n{format_instructions}"
+            # describe_prompt += f"\n\n{format_instructions}"
 
             payload = {
                 "model": "gpt-4o",
-                "response_format": {"type": "json_object"},
+                # "response_format": {"type": "json_object"},
                 "messages": [
                     {
                         "role": "system",
@@ -156,13 +156,15 @@ class YoloLLMAssistant:
                 json=payload,
             )
 
+            print(response.json())
+
             response = response.json()["choices"][0]["message"]["content"]
 
-            data = parser.parse(response)
+            # data = parser.parse(response)
 
-            print(data)
+            print(response)
 
-            return data
+            return response
 
         except Exception as e:
             print(e)
