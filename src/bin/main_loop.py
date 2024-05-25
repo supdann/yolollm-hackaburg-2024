@@ -150,8 +150,10 @@ assistant = YoloLLMAssistant(audio_player=audioplayer)
 def get_description():
     success, img = cap.read()
     if success:
-        image_path = "data/captured_frame.jpg"
-        cv2.imwrite(image_path, img)
+        # Save the current frame as an image
+        image_path = Path("./src/data") / f"describe_frame.jpg"
+        cv2.imwrite(str(image_path), img)
+
         return {"description": assistant.describe(image_path)}
     else:
         return {"error": "Failed to capture image"}
@@ -239,6 +241,7 @@ async def run_camera(process_interval_ms=PROCESS_INTERVAL_MS):
 
             # Analyze the predictions
             assistant.analyze_predictions(with_img=image_path)
+
         cv2.imshow("Webcam", img)
 
         # Break the loop on 'q' key press
@@ -270,3 +273,7 @@ async def main():
 def run():
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
+
+
+if __name__ == "__main__":
+    run()
