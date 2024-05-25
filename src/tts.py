@@ -49,7 +49,7 @@ class AudioPlayer:
         if not file_path.exists():
             self.gen_openai_audio(
                 text=f"{class_name}",
-                voice="alloy",
+                voice="nova",
                 audio_save_path=audio_save_path,
                 file_name=class_name,
             )

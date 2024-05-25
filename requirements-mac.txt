@@ -4,4 +4,3 @@ opencv-python-headless==4.9.0.80
 python-dotenv
 fastapi==0.111.0
 pygame==2.5.2
-langchain==0.2.1
