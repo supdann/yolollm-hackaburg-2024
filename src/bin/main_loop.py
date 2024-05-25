@@ -31,8 +31,6 @@ model = YOLO("models/yolov8n.pt")  # load a pretrained model (recommended for tr
 # List of objects from the YOLO model that can trigger danger warnings
 trigger_objects = ["bottle", "bicycle", "car"]
 
-last_played = {}
-
 # classes
 classNames = [
     "person",
@@ -135,14 +133,8 @@ class SuppressOutput:
 # Video processing interval in milliseconds
 PROCESS_INTERVAL_MS = 600
 
-# Delay between sound playback
-PLAY_DELAY_SECONDS = 5
-
-
 # Initialize FastAPI app
 app = FastAPI()
-
-last_played = {}
 
 # Initialize camera
 cap = cv2.VideoCapture(0)
@@ -217,15 +209,6 @@ async def run_camera(process_interval_ms=PROCESS_INTERVAL_MS):
                         # confidence = math.ceil((box.conf[0] * 100)) / 100
 
                         predicted_classes.append(class_name)
-                        # current_time = time.time()
-                        # if (
-                        #     class_name not in last_played
-                        #     or current_time - last_played[class_name]
-                        #     > PLAY_DELAY_SECONDS
-                        # ):
-                        #     print(f"attempting to play {class_name} ")
-                        #     audioplayer.play(class_name)
-                        #     last_played[class_name] = current_time
 
                         # Object details
                         org = [x1, y1]
