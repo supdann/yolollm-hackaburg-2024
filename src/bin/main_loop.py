@@ -13,7 +13,6 @@ from fastapi import FastAPI
 import uvicorn
 from ultralytics import YOLO
 
-from src.gpt import describe
 from src.assistant import YoloLLMAssistant
 from src.tts import AudioPlayer
 
