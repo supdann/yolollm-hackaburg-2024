@@ -183,5 +183,8 @@ class YoloLLMAssistant:
             img_b64 = self.encode_image(with_img)
             print(f"Image: {len(img_b64)}")
 
-        classes_str = list(self.predictions.keys())
-        self.gen_and_play_instruction(classes_str, img_b64)
+        if self.assistant_queue.empty():
+            classes_str = list(self.predictions.keys())
+            self.gen_and_play_instruction(classes_str, img_b64)
+        else:
+            print("Worker is busy, skipping current frame")
